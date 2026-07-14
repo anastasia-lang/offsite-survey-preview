@@ -344,9 +344,9 @@ const TEAM_FLOW = [
     chips:['🤝 Team building (trust & collaboration)','🧠 Learning & workshops','🌿 Wellness & mindfulness (yoga, meditation)','🏃 Sports & outdoor activities','🌍 Local & cultural experiences','🍽️ Food & social experiences','🛶 Adventure activities','🎉 Celebration & entertainment','❤️ Purpose & impact (giving back)'],
   },
   {
-    id:'topics', type:'multi', kicker:'Feed your brain',
-    title:'Which topics would actually get you in the room?',
-    sub:'Pick up to 5 — or add your own.',
+    id:'topics', type:'multi', kicker:'Learning',
+    title:'What would you like to learn or hear about?',
+    sub:'These become the talks and workshops in Cartagena. Pick up to 5 — or add your own.',
     max:5,
     chips:['AI in my daily work','Product deep-dives','Customer stories & war rooms','Payments industry trends','Storytelling & public speaking','Negotiation skills','Giving & receiving feedback','Technical architecture','How other teams work','Career growth at Yuno','Founder Q&A, no filter'],
   },
@@ -632,8 +632,11 @@ function pickAB(side){
 
 /* multi chips with custom add */
 function renderMulti(q){
-  if(!state._multi) state._multi = new Set(state.answers[q.id]||[]);
-  if(!state._customChips) state._customChips = [];
+  if(state._multiFor !== q.id){
+    state._multi = new Set(state.answers[q.id]||[]);
+    state._customChips = [];
+    state._multiFor = q.id;
+  }
   state._allChips = [...q.chips, ...state._customChips];
   app.innerHTML = `<div class="screen">${head(q)}
     <div class="chips">
@@ -673,8 +676,9 @@ function addChip(){
   renderMulti(q);
 }
 function submitMulti(id){
-  saveAndNext(id, [...state._multi]);
-  state._multi = null; state._customChips = null;
+  const vals = [...state._multi];
+  state._multi = null; state._customChips = null; state._multiFor = null;
+  saveAndNext(id, vals);
 }
 
 /* team: would you host */
