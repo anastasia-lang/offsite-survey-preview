@@ -376,9 +376,9 @@ const ROLE_Q = {
 };
 const LEADER_ADDON = [
   {
-    id:'name', type:'name', kicker:'Leadership bonus round',
+    id:'name', type:'name', kicker:'Leadership survey',
     title:'Who’s answering?',
-    sub:'Everything before this stays anonymous. The bonus round is named — we’ll follow up on your session proposals.',
+    sub:'This survey is named — your answers shape the agenda directly and we’ll follow up on your session proposals.',
     placeholder:'Your name'
   },
   {
@@ -424,8 +424,8 @@ const LEADER_ADDON = [
 /* ---------- helpers ---------- */
 const app = document.getElementById('app');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const isLeader = () => (state.answers.role||'').startsWith('Yes');
-const flow = () => [...TEAM_FLOW, ROLE_Q, ...(isLeader() ? LEADER_ADDON : [])];
+const isLeader = () => !!window.__LEADER_ONLY;
+const flow = () => isLeader() ? LEADER_ADDON : [...TEAM_FLOW];
 
 function go(step){
   state.step = step;
@@ -491,11 +491,11 @@ function renderLanding(){
         Five minutes, a few games, zero boring forms &mdash; your answers literally shape the agenda.
       </p>
       <button class="track-card" onclick="startTrack()" style="justify-content:center;">
-        <span class="ticon">🚀</span>
-        <span><span class="tname">Design the offsite</span>
-        <div class="tdesc">Anonymous &middot; ~5 minutes &middot; be brutally honest</div></span>
+        <span class="ticon">${isLeader() ? '🧭' : '🚀'}</span>
+        <span><span class="tname">${isLeader() ? 'Shape the agenda' : 'Design the offsite'}</span>
+        <div class="tdesc">${isLeader() ? 'Leadership survey &middot; named &middot; ~4 minutes' : 'Anonymous &middot; ~5 minutes &middot; be brutally honest'}</div></span>
       </button>
-      <p class="sub" style="font-size:12px;margin-top:18px;">🔒 Anonymous &mdash; answers are stored securely.</p>
+      <p class="sub" style="font-size:12px;margin-top:18px;">${isLeader() ? '🧭 For the leadership group &mdash; answers are named.' : '🔒 Anonymous &mdash; answers are stored securely.'}</p>
     </div>`;
 }
 
