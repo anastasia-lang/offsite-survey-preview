@@ -60,6 +60,9 @@ const server = http.createServer(function (req, res) {
     return;
   }
   var html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  if (req.url === '/leaders' || req.url === '/leaders/') {
+    html = html.replace('<canvas', '<script>window.__LEADER_ONLY = true;</script><canvas');
+  }
   html = html.replace('</body>', '<script src="/submit.js"></script></body>');
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
   res.end(html);
