@@ -296,6 +296,8 @@ const TEAM_FLOW = [
       {key:'keynotes', emoji:'🎤', name:'Big all-hands keynotes', hint:'Leadership presenting to everyone in one room'},
       {key:'party', emoji:'🪩', name:'The big party night', hint:'You know the one'},
       {key:'excursion', emoji:'⛵', name:'Group excursion / activity day', hint:'Boats, tours, the whole squad moving together'},
+      {key:'hackathon', emoji:'🧑‍💻', name:'Hackathon', hint:'Build-something-in-a-day — a past offsite classic'},
+      {key:'culturetrips', emoji:'🏛️', name:'Cultural trips', hint:'Exploring the city, local culture and food together'},
       {key:'teamdinners', emoji:'🍽️', name:'Team dinners', hint:'Smaller-group dinners with your own team'},
       {key:'workshops', emoji:'🛠️', name:'Workshops & trainings', hint:'Structured learning sessions'},
       {key:'awards', emoji:'🏆', name:'Awards & recognition moments', hint:'Celebrating people on stage'},
@@ -438,7 +440,6 @@ function topbarHTML(){
     <div class="topbar">
       <button class="backbtn ${state.step<=0?'hidden':''}" onclick="goBack()">←</button>
       <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
-      <span class="proto-badge">PROTOTYPE</span>
     </div>`;
 }
 
@@ -487,7 +488,7 @@ function renderLanding(){
         <span><span class="tname">Design the offsite</span>
         <div class="tdesc">Anonymous &middot; ~5 minutes &middot; be brutally honest</div></span>
       </button>
-      <p class="sub" style="font-size:12px;margin-top:18px;">🔍 Prototype &mdash; responses aren't stored yet.</p>
+      <p class="sub" style="font-size:12px;margin-top:18px;">🔒 Anonymous &mdash; answers are stored securely.</p>
     </div>`;
 }
 
@@ -845,7 +846,7 @@ function renderEnd(){
       <p class="sub" style="text-align:center">${isLeader()
         ? 'Your answers go straight into the agenda design — expect follow-up on your session.'
         : 'Your answers are anonymous and go straight into designing the week.'}</p>
-      <div class="note">🔍 <b>Prototype note:</b> below is exactly what would be submitted. In the live version this lands in a response database automatically — this recap screen is just for review.</div>
+      <div class="note">✅ <b>Your answers are in.</b> Here's a recap of what you submitted — thank you for shaping the offsite.</div>
       ${order.filter(id=>state.answers[id]!==undefined).map(id=>`
         <div class="sum-card">
           <div class="sq">${LABELS[id]||id}</div>
