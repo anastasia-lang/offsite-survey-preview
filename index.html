@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cartagena, but better — Offsite Survey</title>
+<title>The Yuno Offsite — Survey</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -313,7 +313,7 @@ const TEAM_FLOW = [
   },
   {
     id:'budget', type:'budget', kicker:'Put your money where your mouth is',
-    title:'You’ve got 100 Cartagena coins. Spend the week.',
+    title:'You’ve got 100 offsite coins. Spend the week.',
     sub:'This is the whole game — there’s never enough time for everything, so show us what actually matters to you.',
     buckets:[
       {key:'deepwork', name:'Deep work with my own team', desc:'Focused sessions to plan and build together'},
@@ -321,7 +321,7 @@ const TEAM_FLOW = [
       {key:'learning', name:'Learning & trainings', desc:'Skills, workshops, masterclasses'},
       {key:'strategy', name:'Strategy & vision sessions', desc:'Where the company is going and why'},
       {key:'bonding', name:'Fun & bonding', desc:'Social time, activities, the party'},
-      {key:'recharge', name:'Free time to recharge', desc:'Pool, beach, nap, explore Cartagena'},
+      {key:'recharge', name:'Free time to recharge', desc:'Sleep in, wander around, do absolutely nothing'},
     ]
   },
   {
@@ -339,26 +339,26 @@ const TEAM_FLOW = [
   {
     id:'activities', type:'multi', kicker:'Activity menu',
     title:'Which activities would you actually join?',
-    sub:'Suggested by your colleagues — pick up to 4 you’d genuinely show up for in Cartagena.',
+    sub:'Suggested by your colleagues — pick up to 4 you’d genuinely show up for at the offsite.',
     max:4,
     chips:['🤝 Team building (trust & collaboration)','🧠 Learning & workshops','🌿 Wellness & mindfulness (yoga, meditation)','🏃 Sports & outdoor activities','🌍 Local & cultural experiences','🍽️ Food & social experiences','🛶 Adventure activities','🎉 Celebration & entertainment','❤️ Purpose & impact (giving back)'],
   },
   {
     id:'topics', type:'multi', kicker:'Learning',
     title:'What would you like to learn or hear about?',
-    sub:'These become the talks and workshops in Cartagena. Pick up to 5 — or add your own.',
+    sub:'These become the talks and workshops at the offsite. Pick up to 5 — or add your own.',
     max:5,
     chips:['AI in my daily work','Product deep-dives','Customer stories & war rooms','Payments industry trends','Storytelling & public speaking','Negotiation skills','Giving & receiving feedback','Technical architecture','How other teams work','Career growth at Yuno','Founder Q&A, no filter'],
   },
   {
     id:'host', type:'host', kicker:'Step up',
-    title:'Would you run something in Cartagena?',
+    title:'Would you run something at the offsite?',
     sub:'A talk, a workshop, a game, a run club at 6am — sessions run by our own people beat any external speaker.',
   },
   {
     id:'magic', type:'text', kicker:'The one that matters',
     title:'It’s the Monday after the offsite. What’s different?',
-    sub:'One sentence. If only one thing changes because of Cartagena, what should it be?',
+    sub:'One sentence. If only one thing changes because of the offsite, what should it be?',
     placeholder:'e.g. I finally understand what the other half of the company does…',
     optional:false
   },
@@ -383,7 +383,7 @@ const LEADER_ADDON = [
   },
   {
     id:'outcomes', type:'rank', kicker:'Start from the end',
-    title:'It’s the Monday after Cartagena. What changed?',
+    title:'It’s the Monday after the offsite. What changed?',
     sub:'Pick your top 3 outcomes, in order. Everything else about the agenda gets designed backwards from this.',
     need:3,
     options:[
@@ -397,7 +397,7 @@ const LEADER_ADDON = [
   },
   {
     id:'decisions', type:'text', kicker:'Decide, not discuss',
-    title:'What must get DECIDED in Cartagena?',
+    title:'What must get DECIDED at the offsite?',
     sub:'Not “discussed”. Decided. List the calls that keep getting postponed and should not survive the week.',
     placeholder:'e.g. ownership of the AI concierge, 2026 priorities per team, org structure for delivery…',
     optional:false
@@ -483,9 +483,9 @@ function head(q){
 function renderLanding(){
   app.innerHTML = `
     <div class="screen landing">
-      <div class="hero-emoji">🌴☀️🇨🇴</div>
-      <div class="kicker">Yuno Offsite · Cartagena 2026</div>
-      <h1>Cartagena,<br>but better.</h1>
+      <div class="hero-emoji">🌴☀️✈️</div>
+      <div class="kicker">Yuno Offsite 2026</div>
+      <h1>The offsite,<br>but better.</h1>
       <p class="sub" style="max-width:440px;margin:0 auto 26px;">
         The Yuno offsite is back &mdash; and this time, all of us design it.
         Five minutes, a few games, zero boring forms &mdash; your answers literally shape the agenda.
@@ -853,7 +853,7 @@ function renderEnd(){
   app.innerHTML = `${topbarHTML()}
     <div class="screen">
       <div class="hero-emoji" style="text-align:center">🎉</div>
-      <h2 style="text-align:center">That's it. Cartagena thanks you.</h2>
+      <h2 style="text-align:center">That's it. Thank you!</h2>
       <p class="sub" style="text-align:center">${isLeader()
         ? 'Your answers go straight into the agenda design — expect follow-up on your session.'
         : 'Your answers are anonymous and go straight into designing the week.'}</p>
