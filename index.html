@@ -348,7 +348,7 @@ const TEAM_FLOW = [
     title:'What would you like to learn or hear about?',
     sub:'These become the talks and workshops at the offsite. Pick up to 5 — or add your own.',
     max:5,
-    chips:['AI in my daily work','Product deep-dives','Customer stories & war rooms','Payments industry trends','Storytelling & public speaking','Negotiation skills','Giving & receiving feedback','Technical architecture','How other teams work','Career growth at Yuno','Founder Q&A, no filter'],
+    chips:['AI in my daily work','Product deep-dives','Customer stories & war rooms','Payments industry trends','Storytelling & public speaking','Negotiation skills','Giving & receiving feedback','Technical architecture','How other teams work','Working across cultures & communication styles','Career growth at Yuno','Founder Q&A, no filter'],
   },
   {
     id:'host', type:'host', kicker:'Step up',
@@ -396,11 +396,51 @@ const LEADER_ADDON = [
     ]
   },
   {
+    id:'ltformat', type:'single', kicker:'Keep it compressed',
+    title:'How much dedicated LT session time?',
+    sub:'Total time the leadership group spends in working sessions — the rest of the offsite is with everyone.',
+    options:[
+      {emoji:'⚡', label:'Half a day — sharp and short'},
+      {emoji:'🎯', label:'One full day'},
+      {emoji:'🗓️', label:'Up to 1.5 days — there’s a lot to cover'},
+    ]
+  },
+  {
+    id:'ltsplit', type:'single', kicker:'Who’s in the room',
+    title:'Should some sessions be smaller?',
+    sub:'Mostly full LT — but a couple of sessions could be reduced LT / C-level where it makes sense.',
+    options:[
+      {emoji:'👥', label:'Everything with the full LT'},
+      {emoji:'🔀', label:'Mostly full LT + a few C-level-only sessions'},
+      {emoji:'🧩', label:'Split by topic — right people per room'},
+    ]
+  },
+  {
+    id:'blocks', type:'rank', kicker:'The building blocks',
+    title:'Rank the must-have agenda blocks',
+    sub:'Top 3, in order. This decides where the hours actually go.',
+    need:3,
+    options:[
+      {emoji:'📣', label:'Company update — CEO address, vision, YTD results & outlook'},
+      {emoji:'🔬', label:'Functional deep dives — Tech, Product, Sales outlook for next year'},
+      {emoji:'🛠️', label:'Working sessions on 2–3 picked topics'},
+      {emoji:'🧭', label:'Coaching / team-dynamics exercise'},
+      {emoji:'🎤', label:'External inspirational speaker'},
+    ]
+  },
+  {
     id:'decisions', type:'text', kicker:'Decide, not discuss',
     title:'What must get DECIDED at the offsite?',
     sub:'Not “discussed”. Decided. List the calls that keep getting postponed and should not survive the week.',
     placeholder:'e.g. ownership of the AI concierge, 2026 priorities per team, org structure for delivery…',
     optional:false
+  },
+  {
+    id:'workshops', type:'multi', kicker:'Workshop picks',
+    title:'We workshop 2–3 topics. Which ones?',
+    sub:'Something to learn and discuss together — not status updates. Pick up to 3, or add your own.',
+    max:3,
+    chips:['People & talent','AI — where it changes our work','Lessons learned from a real project','Communication styles & multicultural teamwork','Ways of working between teams','Customer & market insights'],
   },
   {
     id:'runsession', type:'host-leader', kicker:'Own a slot',
@@ -413,6 +453,16 @@ const LEADER_ADDON = [
     sub:'We meet as a leadership group before everyone arrives. Pick the top 3 topics worth that time.',
     max:3,
     chips:['2026 strategy & vision','Budget & resource allocation','Org design & talent','Product strategy (incl. AI concierge)','Ways of working between our teams','KPIs & accountability','Culture & performance standards','Customer & revenue priorities'],
+  },
+  {
+    id:'fullteam', type:'single', kicker:'Share the good stuff',
+    title:'Coaching or speaker: open it to everyone?',
+    sub:'If budget allows a coaching exercise or an inspirational speaker — is that an LT thing or a full-Yuno moment?',
+    options:[
+      {emoji:'🌍', label:'Open it to the full Yuno team'},
+      {emoji:'🔒', label:'Keep it for the leadership group'},
+      {emoji:'🤔', label:'Depends on the topic / speaker'},
+    ]
   },
   {
     id:'rooms', type:'rooms', kicker:'Logistics that make or break it',
@@ -725,6 +775,7 @@ function renderName(q){
 
 /* leader: rank top N */
 function renderRank(q){
+  if(state._rankFor !== q.id){ state._rank = []; state._rankFor = q.id; }
   if(!state._rank) state._rank = [];
   app.innerHTML = `<div class="screen">${head(q)}
     <div class="opts">
@@ -748,8 +799,9 @@ function toggleRank(i){
 }
 function submitRank(id){
   const q = flow()[state.step];
-  saveAndNext(id, state._rank.map((i,pos)=>`${pos+1}. ${q.options[i].label}`));
-  state._rank = null;
+  const val = state._rank.map((i,pos)=>`${pos+1}. ${q.options[i].label}`);
+  state._rank = null; state._rankFor = null;
+  saveAndNext(id, val);
 }
 
 /* leader: session you'd run */
