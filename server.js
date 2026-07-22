@@ -12,6 +12,7 @@ const pool = new Pool({
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const AUTH_SECRET = process.env.AUTH_SECRET || crypto.randomBytes(32).toString('hex');
 const ALLOWED_DOMAIN = (process.env.ALLOWED_DOMAIN || 'y.uno').toLowerCase();
+const ADMIN_EMAILS = (process.env.DASHBOARD_ADMINS || 'anastasia@y.uno').toLowerCase().split(',').map(function (s) { return s.trim(); }).filter(Boolean);
 const COOKIE_NAME = 'ysurv';
 const COOKIE_MAX_AGE = 604800;
 
@@ -19,12 +20,12 @@ function sign(payload) {
   return crypto.createHmac('sha256', AUTH_SECRET).update(payload).digest('base64url');
 }
 
-function makeToken() {
-  const payload = 'ok.' + (Math.floor(Date.now() / 1000) + COOKIE_MAX_AGE);
+function makeToken(role) {
+  const payload = (role === 'adm' ? 'adm' : 'ok') + '.' + (Math.floor(Date.now() / 1000) + COOKIE_MAX_AGE);
   return payload + '.' + sign(payload);
 }
 
-function hasValidCookie(req) {
+function cookieRole(req) {
   const header = req.headers.cookie || '';
   const parts = header.split(';');
   for (let i = 0; i < parts.length; i++) {
@@ -32,17 +33,25 @@ function hasValidCookie(req) {
     if (kv.indexOf(COOKIE_NAME + '=') === 0) {
       const token = kv.slice(COOKIE_NAME.length + 1);
       const seg = token.split('.');
-      if (seg.length !== 3 || seg[0] !== 'ok') return false;
+      if (seg.length !== 3 || (seg[0] !== 'ok' && seg[0] !== 'adm')) return null;
       const payload = seg[0] + '.' + seg[1];
       let expected;
-      try { expected = sign(payload); } catch (e) { return false; }
-      if (expected.length !== seg[2].length) return false;
-      if (!crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(seg[2]))) return false;
-      if (parseInt(seg[1], 10) < Math.floor(Date.now() / 1000)) return false;
-      return true;
+      try { expected = sign(payload); } catch (e) { return null; }
+      if (expected.length !== seg[2].length) return null;
+      if (!crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(seg[2]))) return null;
+      if (parseInt(seg[1], 10) < Math.floor(Date.now() / 1000)) return null;
+      return seg[0];
     }
   }
-  return false;
+  return null;
+}
+
+function hasValidCookie(req) { return cookieRole(req) !== null; }
+
+function csvCell(v) {
+  if (v == null) return '';
+  const s = typeof v === 'object' ? JSON.stringify(v) : String(v);
+  return '"' + s.replace(/"/g, '""') + '"';
 }
 
 const CLIENT_LINES = [
@@ -150,9 +159,10 @@ const server = http.createServer(function (req, res) {
           var okVerified = info.email_verified === 'true' || info.email_verified === true;
           var okDomain = email.length > ALLOWED_DOMAIN.length + 1 && email.slice(-(ALLOWED_DOMAIN.length + 1)) === '@' + ALLOWED_DOMAIN;
           if (okAud && okIss && okVerified && okDomain) {
+            var role = ADMIN_EMAILS.indexOf(email) > -1 ? 'adm' : 'ok';
             res.writeHead(200, {
               'Content-Type': 'application/json',
-              'Set-Cookie': COOKIE_NAME + '=' + makeToken() + '; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=' + COOKIE_MAX_AGE
+              'Set-Cookie': COOKIE_NAME + '=' + makeToken(role) + '; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=' + COOKIE_MAX_AGE
             });
             res.end('{"ok":true}');
           } else {
@@ -176,6 +186,49 @@ const server = http.createServer(function (req, res) {
     return;
   }
   if (req.url === '/submit.js') { res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' }); res.end(CLIENT_JS); return; }
+  if (req.url === '/results' || req.url === '/results/') {
+    var role1 = cookieRole(req);
+    if (role1 !== 'adm') {
+      res.writeHead(role1 === 'ok' ? 403 : 200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+      var page = LOGIN_HTML.replace('__CLIENT_ID__', GOOGLE_CLIENT_ID);
+      if (role1 === 'ok') {
+        page = page.replace('Sign in with your Yuno Google account to open the survey.', 'This results dashboard is restricted to the organizing team. If you were just added, sign in again below.');
+      }
+      res.end(page);
+      return;
+    }
+    var dash;
+    try { dash = fs.readFileSync(path.join(__dirname, 'dashboard.html'), 'utf8'); } catch (e) { res.writeHead(500); res.end('dashboard missing'); return; }
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+    res.end(dash);
+    return;
+  }
+  if (req.url === '/results/data.json') {
+    if (cookieRole(req) !== 'adm') { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end('{"ok":false}'); return; }
+    pool.query('SELECT id, created_at, track, name, answers FROM responses ORDER BY created_at DESC')
+      .then(function (r) { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify({ ok: true, responses: r.rows })); })
+      .catch(function (e) { res.writeHead(500, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: false, error: e.message })); });
+    return;
+  }
+  if (req.url === '/results/export.csv') {
+    if (cookieRole(req) !== 'adm') { res.writeHead(403); res.end('forbidden'); return; }
+    pool.query('SELECT id, created_at, track, name, answers FROM responses ORDER BY created_at')
+      .then(function (r) {
+        var keys = [];
+        r.rows.forEach(function (row) {
+          Object.keys(row.answers || {}).forEach(function (k) { if (k !== 'name' && keys.indexOf(k) === -1) keys.push(k); });
+        });
+        var lines = ['id,created_at,track,name,' + keys.join(',')];
+        r.rows.forEach(function (row) {
+          var a = row.answers || {};
+          lines.push([row.id, row.created_at.toISOString(), row.track || '', row.name || ''].map(csvCell).join(',') + ',' + keys.map(function (k) { return csvCell(a[k]); }).join(','));
+        });
+        res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': 'attachment; filename="offsite-survey-responses.csv"' });
+        res.end(lines.join(String.fromCharCode(10)));
+      })
+      .catch(function (e) { res.writeHead(500); res.end('error: ' + e.message); });
+    return;
+  }
   if (req.url === '/health') {
     pool.query('SELECT count(*)::int AS n FROM responses')
       .then(function (r) { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: true, responses: r.rows[0].n })); })
