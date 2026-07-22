@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offsite Survey — Results</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#3E4FE0; --amber:#ED9B00; --red:#E34948;
+  --ink:#0A0A0F; --muted:#5A5F6E; --faint:#9BA0AD;
+  --paper:#FAFAF7; --card:#FFFFFF; --line:rgba(10,10,15,.10);
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;padding:28px 20px 80px;}
+.wrap{max-width:920px;margin:0 auto;}
+.kicker{font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:8px;}
+h1{font-size:30px;letter-spacing:-.02em;margin-bottom:4px;}
+.updated{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.updated button{margin-left:8px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink);}
+.stats{display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap;}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 20px;min-width:130px;}
+.tile .n{font-size:28px;font-weight:700;letter-spacing:-.02em;}
+.tile .l{font-size:12px;color:var(--muted);}
+.tabs{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;}
+.tab{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 18px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted);}
+.tab.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.panel{display:none;}
+.panel.active{display:block;}
+.chart{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;}
+.chart h3{font-size:15px;font-weight:600;margin-bottom:2px;}
+.chart .csub{font-size:12.5px;color:var(--muted);margin-bottom:14px;}
+.row{display:grid;grid-template-columns:190px 1fr 44px;gap:10px;align-items:center;margin-bottom:8px;font-size:13.5px;}
+.row .rl{color:var(--ink);text-align:right;line-height:1.25;}
+.row .rv{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;font-size:13px;}
+.barwrap{background:rgba(10,10,15,.05);border-radius:5px;height:18px;position:relative;}
+.bar{height:18px;border-radius:0 4px 4px 0;background:var(--blue);min-width:2px;transition:width .3s;}
+.stack{display:flex;height:18px;border-radius:5px;overflow:hidden;background:rgba(10,10,15,.05);}
+.seg{height:18px;margin-right:2px;position:relative;}
+.seg:last-child{margin-right:0;}
+.seg span{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+.seg.keep{background:var(--blue);}
+.seg.remix{background:var(--amber);}
+.seg.kill{background:var(--red);}
+.legend{display:flex;gap:16px;font-size:12.5px;color:var(--muted);margin-bottom:12px;}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;}
+.ab-row{margin-bottom:14px;}
+.ab-labels{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;gap:12px;}
+.ab-labels .pct{font-weight:700;font-variant-numeric:tabular-nums;}
+.ab-track{display:flex;height:18px;border-radius:5px;overflow:hidden;background:rgba(10,10,15,.05);}
+.ab-a{background:var(--blue);height:18px;margin-right:2px;}
+.ab-b{background:var(--red);height:18px;}
+.quotes{display:flex;flex-direction:column;gap:8px;}
+.quote{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:13.5px;line-height:1.45;}
+.quote .who{font-family:'Geist Mono',monospace;font-size:11px;color:var(--blue);margin-bottom:2px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap;}
+th:hover{color:var(--blue);}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+td.ans{font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--muted);max-width:420px;overflow-wrap:anywhere;}
+.btn{display:inline-block;border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:10px;padding:9px 18px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;}
+.btn.ghost{background:transparent;color:var(--blue);}
+.empty{color:var(--muted);font-size:13.5px;padding:8px 0;}
+.bar:hover,.seg:hover,.ab-a:hover,.ab-b:hover{filter:brightness(.92);}
+@media (max-width:640px){ .row{grid-template-columns:1fr;gap:3px;} .row .rl{text-align:left;} .barwrap{width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Yuno Offsite 2026 · Organizers only</div>
+  <h1>Survey results</h1>
+  <div class="updated">Live from the database · updated <span id="upd">—</span>
+    <button onclick="load()">Refresh now</button> · auto-refreshes every 60s
+  </div>
+  <div class="stats" id="tiles"></div>
+  <div class="tabs">
+    <button class="tab active" data-p="team" onclick="showTab('team')">Team survey</button>
+    <button class="tab" data-p="leaders" onclick="showTab('leaders')">Leadership</button>
+    <button class="tab" data-p="raw" onclick="showTab('raw')">All responses</button>
+  </div>
+  <div class="panel active" id="p-team"></div>
+  <div class="panel" id="p-leaders"></div>
+  <div class="panel" id="p-raw"></div>
+</div>
+<script>
+let DATA = [];
+let sortCol = 'created_at', sortDir = -1;
+
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function showTab(p){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.p === p));
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+  document.getElementById('p-' + p).classList.add('active');
+}
+
+function count(rows, id){
+  const m = new Map();
+  rows.forEach(r => {
+    const v = (r.answers||{})[id];
+    if (v == null || v === '') return;
+    (Array.isArray(v) ? v : [v]).forEach(x => m.set(x, (m.get(x)||0) + 1));
+  });
+  return [...m.entries()].sort((a,b) => b[1]-a[1]);
+}
+
+function bars(title, sub, entries, total){
+  if (!entries.length) return chartBox(title, sub, '<div class="empty">No answers yet.</div>');
+  const max = Math.max(...entries.map(e => e[1]));
+  const rows = entries.map(([l,n]) =>
+    '<div class="row"><div class="rl">' + esc(l) + '</div>' +
+    '<div class="barwrap"><div class="bar" title="' + esc(l) + ': ' + n + '" style="width:' + Math.round(n/max*100) + '%"></div></div>' +
+    '<div class="rv">' + n + (total ? ' <span style="color:var(--faint);font-weight:400">· ' + Math.round(n/total*100) + '%</span>' : '') + '</div></div>'
+  ).join('');
+  return chartBox(title, sub, rows);
+}
+
+function chartBox(title, sub, inner){
+  return '<div class="chart"><h3>' + esc(title) + '</h3><div class="csub">' + esc(sub) + '</div>' + inner + '</div>';
+}
+
+function rankScores(rows, id){
+  const m = new Map();
+  rows.forEach(r => {
+    const v = (r.answers||{})[id];
+    if (!Array.isArray(v)) return;
+    v.forEach(item => {
+      const mt = String(item).match(/^(\d+)\.\s*(.*)$/);
+      if (!mt) return;
+      const pts = 4 - parseInt(mt[1],10); // 1st=3, 2nd=2, 3rd=1
+      if (pts < 1) return;
+      m.set(mt[2], (m.get(mt[2])||0) + pts);
+    });
+  });
+  return [...m.entries()].sort((a,b) => b[1]-a[1]);
+}
+
+function quotes(title, sub, items){
+  if (!items.length) return chartBox(title, sub, '<div class="empty">No answers yet.</div>');
+  return chartBox(title, sub, '<div class="quotes">' + items.map(q =>
+    '<div class="quote">' + (q.who ? '<div class="who">' + esc(q.who) + '</div>' : '') + esc(q.text) + '</div>').join('') + '</div>');
+}
+
+function renderTeam(rows){
+  let h = '';
+  h += bars('Offsite veterans', 'How many Yuno offsites have you lived through?', count(rows,'veteran'), rows.length);
+
+  // KKR stacked
+  const cards = new Map();
+  rows.forEach(r => {
+    const v = (r.answers||{}).kkr; if (!v) return;
+    Object.entries(v).forEach(([card, verdict]) => {
+      if (!cards.has(card)) cards.set(card, {keep:0, remix:0, kill:0});
+      const c = cards.get(card); if (c[verdict] != null) c[verdict]++;
+    });
+  });
+  if (cards.size){
+    const inner = '<div class="legend"><span><i style="background:var(--blue)"></i>Keep</span><span><i style="background:var(--amber)"></i>Remix</span><span><i style="background:var(--red)"></i>Kill</span></div>' +
+      [...cards.entries()].sort((a,b) => (b[1].keep)-(a[1].keep)).map(([card,c]) => {
+        const tot = c.keep + c.remix + c.kill || 1;
+        const seg = k => c[k] ? '<div class="seg ' + k + '" title="' + esc(card) + ' — ' + k + ': ' + c[k] + '" style="flex:' + c[k] + '"><span>' + c[k] + '</span></div>' : '';
+        return '<div class="row"><div class="rl">' + esc(card) + '</div><div class="stack">' + seg('keep') + seg('remix') + seg('kill') + '</div><div class="rv">' + tot + '</div></div>';
+      }).join('');
+    h += chartBox('Keep · Remix · Kill', 'Verdicts on the offsite classics', inner);
+  } else h += chartBox('Keep · Remix · Kill', 'Verdicts on the offsite classics', '<div class="empty">No answers yet.</div>');
+
+  // Budget: average coins
+  const sums = {}, ns = {};
+  rows.forEach(r => {
+    const v = (r.answers||{}).budget; if (!v) return;
+    Object.entries(v).forEach(([k,n]) => { sums[k]=(sums[k]||0)+n; ns[k]=(ns[k]||0)+1; });
+  });
+  const BNAMES = {deepwork:'Deep work with my own team', crossteam:'Working with other teams', learning:'Learning & trainings', strategy:'Strategy & vision sessions', bonding:'Fun & bonding', recharge:'Free time to recharge'};
+  const bentries = Object.keys(sums).map(k => [BNAMES[k]||k, Math.round(sums[k]/ns[k])]).sort((a,b) => b[1]-a[1]);
+  h += bars('Where the coins went', 'Average of 100 offsite coins allocated per person', bentries, 0);
+
+  // AB pairs
+  const abRows = rows.map(r => (r.answers||{}).ab).filter(Array.isArray);
+  if (abRows.length){
+    const PAIRS = [
+      ['Deep sessions with my own team','Mixing with people I never work with'],
+      ['A full schedule — tell me where to be','Open space — let me choose my sessions'],
+      ['Work hard mornings, free afternoons','Full workdays, evenings 100% social'],
+      ['Learn from outside experts','Learn from colleagues who’ve done it'],
+      ['One big everyone-together blowout','Smaller, calmer group evenings'],
+    ];
+    const inner = PAIRS.map((p,i) => {
+      let a=0,b=0;
+      abRows.forEach(arr => { if (arr[i]===p[0]) a++; else if (arr[i]===p[1]) b++; });
+      const tot = a+b||1, pa = Math.round(a/tot*100), pb = 100-pa;
+      return '<div class="ab-row"><div class="ab-labels"><span><span class="pct" style="color:var(--blue)">' + pa + '%</span> ' + esc(p[0]) + '</span><span>' + esc(p[1]) + ' <span class="pct" style="color:var(--red)">' + pb + '%</span></span></div>' +
+        '<div class="ab-track"><div class="ab-a" title="' + esc(p[0]) + ': ' + a + '" style="flex:' + (a||0.001) + '"></div><div class="ab-b" title="' + esc(p[1]) + ': ' + b + '" style="flex:' + (b||0.001) + '"></div></div></div>';
+    }).join('');
+    h += chartBox('This or that', abRows.length + ' people went with their gut', inner);
+  } else h += chartBox('This or that', 'Quick-fire preferences', '<div class="empty">No answers yet.</div>');
+
+  h += bars('Activity menu', 'Which activities people would actually join', count(rows,'activities'), rows.length);
+  h += bars('Learning topics', 'What people want to learn or hear about (incl. write-ins)', count(rows,'topics'), rows.length);
+
+  // Hosts
+  const hosts = rows.map(r => (r.answers||{}).host).filter(v => v && v.will === 'yes');
+  h += quotes('Volunteer hosts — ' + hosts.length + ' hands up', 'People offering to run something', hosts.map(x => ({who: x.name || 'Anonymous', text: x.what || '(no description)'})));
+
+  h += quotes('Invented from scratch', 'Things we’ve never done at an offsite', rows.map(r => (r.answers||{}).create).filter(Boolean).map(t => ({text: t})));
+  h += quotes('The Monday-after wish', 'If only one thing changes because of the offsite…', rows.map(r => (r.answers||{}).magic).filter(Boolean).map(t => ({text: t})));
+  document.getElementById('p-team').innerHTML = h;
+}
+
+function renderLeaders(rows){
+  let h = '';
+  const names = rows.map(r => (r.answers||{}).name || r.name).filter(Boolean);
+  h += chartBox('Who answered', names.length + ' of the leadership group', names.length ? '<div class="quotes">' + names.map(n => '<div class="quote">' + esc(n) + '</div>').join('') + '</div>' : '<div class="empty">No answers yet.</div>');
+  h += bars('Top outcomes (weighted)', '1st pick = 3 pts · 2nd = 2 · 3rd = 1', rankScores(rows,'outcomes'), 0);
+  h += bars('LT session time', 'How compressed should the LT part be?', count(rows,'ltformat'), rows.length);
+  h += bars('Room composition', 'Full LT vs. smaller sessions', count(rows,'ltsplit'), rows.length);
+  h += bars('Must-have agenda blocks (weighted)', '1st pick = 3 pts · 2nd = 2 · 3rd = 1', rankScores(rows,'blocks'), 0);
+  h += bars('Workshop topics', 'What to actually workshop (max 3 each, incl. write-ins)', count(rows,'workshops'), rows.length);
+  h += bars('Leadership weekend', 'What deserves the pre-offsite hours', count(rows,'weekend'), rows.length);
+  h += bars('Coaching / speaker audience', 'Open to everyone, or LT only?', count(rows,'fullteam'), rows.length);
+
+  h += quotes('Decisions that must get made', 'Named — so you can follow up', rows.map(r => {
+    const d = (r.answers||{}).decisions; return d ? {who: (r.answers||{}).name || 'Unknown', text: d} : null;
+  }).filter(Boolean));
+
+  const sess = rows.map(r => {
+    const s = (r.answers||{}).runsession; if (!s || !s.session) return null;
+    return {who: ((r.answers||{}).name || 'Unknown') + ' → ' + (Array.isArray(s.audience) ? s.audience.join(', ') : ''), text: s.session};
+  }).filter(Boolean);
+  h += quotes('Sessions leaders will run', 'One slot each', sess);
+
+  const rms = rows.map(r => {
+    const s = (r.answers||{}).rooms; if (!s) return null;
+    return {who: ((r.answers||{}).name || 'Unknown') + ' · ' + (s.halfDayBlocks || '?') + ' half-day block(s)', text: s.teams || '(no detail)'};
+  }).filter(Boolean);
+  h += quotes('Room bookings needed', 'Teams and half-day blocks to reserve', rms);
+  document.getElementById('p-leaders').innerHTML = h;
+}
+
+function renderRaw(){
+  const rows = [...DATA].sort((a,b) => {
+    let x = a[sortCol], y = b[sortCol];
+    if (sortCol === 'answers'){ x = JSON.stringify(x); y = JSON.stringify(y); }
+    return (x > y ? 1 : x < y ? -1 : 0) * sortDir;
+  });
+  const arrow = c => sortCol === c ? (sortDir === 1 ? ' ↑' : ' ↓') : '';
+  const h = '<div class="chart" style="overflow-x:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">' +
+    '<h3 style="margin:0">' + DATA.length + ' responses</h3>' +
+    '<a class="btn ghost" href="/results/export.csv">⬇ Download CSV</a></div>' +
+    '<table><thead><tr>' +
+    '<th onclick="sortBy(\'created_at\')">When' + arrow('created_at') + '</th>' +
+    '<th onclick="sortBy(\'track\')">Survey' + arrow('track') + '</th>' +
+    '<th onclick="sortBy(\'name\')">Name' + arrow('name') + '</th>' +
+    '<th onclick="sortBy(\'answers\')">Answers</th>' +
+    '</tr></thead><tbody>' +
+    rows.map(r => '<tr><td style="white-space:nowrap">' + new Date(r.created_at).toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) + '</td>' +
+      '<td>' + (r.track === 'leader' ? '🧭 Leadership' : '🌍 Team') + '</td>' +
+      '<td>' + esc((r.answers||{}).name || r.name || '—') + '</td>' +
+      '<td class="ans">' + esc(JSON.stringify(r.answers)) + '</td></tr>').join('') +
+    '</tbody></table></div>';
+  document.getElementById('p-raw').innerHTML = h;
+}
+
+function sortBy(c){
+  if (sortCol === c) sortDir *= -1; else { sortCol = c; sortDir = 1; }
+  renderRaw();
+}
+
+async function load(){
+  try {
+    const res = await fetch('/results/data.json', {cache:'no-store'});
+    if (res.status === 403 || res.status === 401){ document.getElementById('tiles').innerHTML = '<div class="tile"><div class="l">Access expired — reload the page and sign in again.</div></div>'; return; }
+    DATA = (await res.json()).responses || [];
+  } catch(e){ return; }
+  const team = DATA.filter(r => r.track !== 'leader');
+  const leaders = DATA.filter(r => r.track === 'leader');
+  document.getElementById('tiles').innerHTML =
+    '<div class="tile"><div class="n">' + DATA.length + '</div><div class="l">Total responses</div></div>' +
+    '<div class="tile"><div class="n">' + team.length + '</div><div class="l">Team survey</div></div>' +
+    '<div class="tile"><div class="n">' + leaders.length + '</div><div class="l">Leadership survey</div></div>';
+  renderTeam(team);
+  renderLeaders(leaders);
+  renderRaw();
+  document.getElementById('upd').textContent = new Date().toLocaleTimeString('en-GB');
+}
+load();
+setInterval(load, 60000);
+</script>
+</body>
+</html>
